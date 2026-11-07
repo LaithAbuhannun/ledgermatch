@@ -2,6 +2,14 @@
 
 A self-hosted workspace for reconciling internal cash records against settlement exports and tracking the exceptions through investigation and resolution.
 
+## Watch it work
+
+[![LedgerMatch workflow preview](docs/walkthrough.gif)](https://github.com/LaithAbuhannun/ledgermatch/releases/download/walkthrough-v1/ledgermatch-walkthrough.mp4)
+
+**[Watch or download the one-minute walkthrough (MP4)](https://github.com/LaithAbuhannun/ledgermatch/releases/download/walkthrough-v1/ledgermatch-walkthrough.mp4)** · [Release page](https://github.com/LaithAbuhannun/ledgermatch/releases/tag/walkthrough-v1)
+
+CSV import → column mapping → comparison → investigation → resolution → saved history. The silent video uses captions and edited captures of the running app with synthetic data.
+
 ## Who it helps
 
 A cash operations analyst compares a ledger/platform export with a bank settlement export. Straightforward matches need no further work. The remaining items need an owner, an explanation and a record of the decision. Without that workflow, people can end up maintaining a separate spreadsheet or repeating an investigation the next day.
@@ -37,7 +45,7 @@ export LEDGERMATCH_API_KEY=local-demo-key-change-me
 ./mvnw spring-boot:run
 ```
 
-Open **http://127.0.0.1:8080** and choose **Try an example**. No access key is needed to view the read-only sample report.
+Open **http://127.0.0.1:8080** and choose **Example report**. No access key is needed to view the read-only sample report.
 
 For your own files, enter an account name and date, choose the ledger and bank CSVs, check the previews, and compare. Open **Connect to your local workspace** to supply the configured access key. Sample CSV downloads and a format guide are included in the form. Results support search, issue filters, payment details and CSV export.
 
