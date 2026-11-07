@@ -2,32 +2,39 @@
 
 A self-hosted workspace for reconciling internal cash records against settlement exports and tracking the exceptions through investigation and resolution.
 
-## Watch it work
-
-[![LedgerMatch workflow preview](docs/walkthrough.gif)](https://github.com/LaithAbuhannun/ledgermatch/releases/download/walkthrough-v1/ledgermatch-walkthrough.mp4)
-
-**[Watch or download the one-minute walkthrough (MP4)](https://github.com/LaithAbuhannun/ledgermatch/releases/download/walkthrough-v1/ledgermatch-walkthrough.mp4)** · [Release page](https://github.com/LaithAbuhannun/ledgermatch/releases/tag/walkthrough-v1)
-
-CSV import → column mapping → comparison → investigation → resolution → saved history. The silent video uses captions and edited captures of the running app with synthetic data.
-
 ## Who it helps
 
 A cash operations analyst compares a ledger/platform export with a bank settlement export. Straightforward matches need no further work. The remaining items need an owner, an explanation and a record of the decision. Without that workflow, people can end up maintaining a separate spreadsheet or repeating an investigation the next day.
 
 LedgerMatch keeps imported source records, the original matching report and reviewer updates together. It does not move money, correct a ledger or claim that a resolved discrepancy was an exact match.
 
-![LedgerMatch reconciliation workspace](docs/preview.png)
+## How it works
 
-## Workflow
+These screenshots use synthetic settlement records.
 
-1. Import two CSV exports and map their reference, amount and currency columns. Extra columns can be left unmapped; a fixed currency can be explicitly selected for single-currency files.
-2. Review a preview before submitting the account/date batch.
-3. Inspect missing items, different amounts/currencies and duplicate references side by side.
-4. Assign an owner, record investigation notes, and change the review to Open, In progress or Resolved. Resolutions require a reason and a note.
-5. Reopen a saved run later. Review updates are timestamped and retained; concurrent stale updates are rejected.
-6. Export the payment rows with review status, owner and latest note for spreadsheet handover.
+### 1. Import your exports
 
-![Exception investigation and review history](docs/review.png)
+Choose an account and settlement date, then upload your internal records and the corresponding bank CSV. Map the reference, amount and currency columns and check the previews before comparing.
+
+![Import internal records and bank settlement files](docs/guide-import.png)
+
+### 2. Review the comparison
+
+See matching payments alongside missing records, amount or currency differences and duplicate references. Search by reference or filter by issue type. In this example, ten references match and one of the six exceptions has been resolved.
+
+![Comparison results with matching payments and exceptions](docs/guide-results.png)
+
+### 3. Investigate and record the outcome
+
+Open a payment to inspect both source records. Assign an owner, add investigation notes and record a resolution reason. The original discrepancy stays intact, and each review update is retained in the activity history.
+
+![Payment details and review decision](docs/guide-review.png)
+
+### 4. Return to saved work
+
+Reopen a previous reconciliation to continue reviewing. Export CSV from the results to hand over payment rows with their review status, owner and latest note.
+
+![Saved reconciliation history](docs/guide-history.png)
 
 ## Engineering
 
