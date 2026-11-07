@@ -15,7 +15,7 @@
 - `ReconciliationEngine.java`: matching rules, grouping, status priority and decimal comparisons. No Spring web/database calls here.
 - `BatchController.java`: HTTP contract, pagination and status codes.
 - `BatchService.java`: serialisation, fingerprints, persistence and race handling.
-- `ApiKeyFilter.java`: the deliberately simple demo access boundary.
+- `ApiKeyFilter.java`: the single-workspace access boundary.
 - Tests: see what behaviour is actually demonstrated, including limitations.
 
 ## Questions to be ready for
@@ -34,4 +34,8 @@
 
 ## A useful next change to implement yourself
 
-Add a bank-only duplicate test, or a saved account preset. Explain the behaviour first, write a failing test, implement the change and run the suite. For a deeper change, persist versioned report snapshots so future matching-rule changes cannot alter historical reports.
+Add a bank-only duplicate test, or a saved account preset. Explain the behaviour first, write a failing test, implement the change and run the suite. For a deeper change, add a verified identity provider and account-level authorisation. New reconciliation reports are already snapshotted.
+
+## Daily investigation workflow
+
+After importing and comparing a batch, open a discrepancy. Assign it to Cash operations, record a note and mark it In progress. Reopen it, select a specific resolution reason and record supporting context before marking it Resolved. The open count drops, while the discrepancy remains visible under All payments. Open Saved runs and return to the same batch: owner, notes and decisions persist. Export CSV to hand over the current review state. Reopening an issue adds history rather than deleting the earlier resolution.

@@ -1,30 +1,31 @@
 # LedgerMatch
 
-A Java Spring Boot payment reconciliation service. Compare an internal ledger with bank settlement data and review the exceptions instead of checking every payment by hand.
+A self-hosted workspace for reconciling internal cash records against settlement exports and tracking the exceptions through investigation and resolution.
 
-**Personal portfolio project.** Uses synthetic data, never initiates payments, and is not affiliated with a bank or investment platform. Built with AI coding assistance; the implementation, tests and design notes are available for review.
+## Who it helps
 
-![LedgerMatch sample exception report](docs/preview.png)
+A cash operations analyst compares a ledger/platform export with a bank settlement export. Straightforward matches need no further work. The remaining items need an owner, an explanation and a record of the decision. Without that workflow, people can end up maintaining a separate spreadsheet or repeating an investigation the next day.
 
-## The problem
+LedgerMatch keeps imported source records, the original matching report and reviewer updates together. It does not move money, correct a ledger or claim that a resolved discrepancy was an exact match.
 
-A payment may appear in an internal ledger but not a settlement file. A file might contain the same reference twice, the wrong amount, or a different currency. A spreadsheet comparison can hide duplicates or accidentally compare amounts across currencies. LedgerMatch makes these cases explicit and keeps the submitted batch for later review.
+![LedgerMatch reconciliation workspace](docs/preview.png)
 
-The included sample contains six references: one match, one missing bank payment, one missing ledger payment, one amount mismatch, one currency mismatch and one duplicate reference.
+## Workflow
 
-## What it does
+1. Import two CSV exports and map their reference, amount and currency columns. Extra columns can be left unmapped; a fixed currency can be explicitly selected for single-currency files.
+2. Review a preview before submitting the account/date batch.
+3. Inspect missing items, different amounts/currencies and duplicate references side by side.
+4. Assign an owner, record investigation notes, and change the review to Open, In progress or Resolved. Resolutions require a reason and a note.
+5. Reopen a saved run later. Review updates are timestamped and retained; concurrent stale updates are rejected.
+6. Export the payment rows with review status, owner and latest note for spreadsheet handover.
 
-- REST API to submit, retrieve and list settlement batches.
-- Deterministic reference matching, with all input rows preserved in the report.
-- `BigDecimal` money comparisons; `10.0` and `10.00` match without floating-point rounding.
-- Duplicate references are exceptions, never silently merged or summed.
-- Persistent batches with Spring Data JPA and Flyway schema migrations.
-- PostgreSQL configuration for Docker Compose and CI; file-backed H2 for local development.
-- Idempotency keys with a database uniqueness constraint and conflict handling for concurrent retries.
-- Validated nested input and consistent HTTP problem responses.
-- Shared API-key protection for data endpoints and metrics; public liveness/readiness summary.
-- Actuator health, Prometheus metrics, paginated history and a CSV upload interface with previews, issue filters, payment details and spreadsheet export.
-- Unit and API/database integration tests, plus GitHub Actions running against PostgreSQL.
+![Exception investigation and review history](docs/review.png)
+
+## Engineering
+
+Java 17, Spring Boot, Spring Data JPA, Flyway, PostgreSQL/H2 and JUnit 5. Exact decimal comparison, signed credits/debits, idempotent ingestion, immutable report snapshots for new runs, optimistic concurrency for review decisions and append-only review events through the API. GitHub Actions tests against PostgreSQL and runs the CSV parser/export suite.
+
+The matching engine is deterministic. No AI model is used to guess whether money matches.
 
 ## Run locally
 
@@ -38,7 +39,7 @@ export LEDGERMATCH_API_KEY=local-demo-key-change-me
 
 Open **http://127.0.0.1:8080** and choose **Try an example**. No access key is needed to view the read-only sample report.
 
-For your own synthetic files, enter an account name and date, choose the ledger and bank CSVs, check the previews, and compare. Open **Connect to your local workspace** to supply the configured access key. Sample CSV downloads and a format guide are included in the form. Results support search, issue filters, payment details and CSV export.
+For your own files, enter an account name and date, choose the ledger and bank CSVs, check the previews, and compare. Open **Connect to your local workspace** to supply the configured access key. Sample CSV downloads and a format guide are included in the form. Results support search, issue filters, payment details and CSV export.
 
 Data is stored in `data/` (excluded from Git). The server key is required at startup, and the browser keeps it in memory only for the session.
 
@@ -52,7 +53,7 @@ cp .env.example .env
 docker compose up --build
 ```
 
-Compose waits for PostgreSQL readiness and binds the app to localhost. Flyway creates the schema; Hibernate validates it. The app container runs as a non-root user. To remove demo database contents intentionally, use `docker compose down --volumes`.
+Compose waits for PostgreSQL readiness and binds the app to localhost. Flyway creates the schema; Hibernate validates it. The app container runs as a non-root user. To remove local database contents intentionally, use `docker compose down --volumes`.
 
 ## API example
 
@@ -99,17 +100,25 @@ flowchart LR
   Engine --> Report[Deterministic exception report]
 ```
 
-A modular monolith keeps matching logic independent of HTTP and storage. There is no external bank connection or network dependency in reconciliation. Reports are recomputed from the immutable stored submission with the current engine rules. This makes the implementation small, but an engine change could alter a historical report; a versioned report snapshot would be needed for audit-grade use.
+A modular monolith keeps matching logic independent of HTTP and storage. There is no external bank connection or network dependency in reconciliation. New runs store an immutable report snapshot alongside the original submission. Reviewer decisions are separate from matching results. Legacy runs created before the snapshot migration retain the old recomputation fallback.
 
 ## Trade-offs and boundaries
 
 - Exact, case-sensitive reference matching within one account/date batch. No fuzzy matching, partial settlements, FX conversion, fees, reversals or netting.
-- Positive amounts only, with two fractional digits maximum. Currencies with other minor-unit conventions are outside this demo's money model.
-- A shared key is a demo access boundary, **not** user identity or account-level authorisation. It is unsuitable for real financial records without tenant isolation, proper identity, HTTPS, key rotation, retention controls and access auditing.
+- Signed amounts, with two fractional digits maximum. Positive credits and negative debits must use the same convention in both files. Currencies with other minor-unit conventions are outside this demo's money model.
+- A shared key controls access to a single trusted workspace; it is **not** user identity or account-level authorisation. Reviewer names are self-reported. It is unsuitable for real financial records in a public/multi-user deployment without tenant isolation, verified identity, HTTPS, key rotation, retention controls and access auditing.
 - The request is synchronous and bounded to 5,000 entries per source. A large-file system would need streamed ingestion, background jobs and backpressure.
 - Fingerprints use the serialised parsed submission. List order, account whitespace and decimal scale are significant for idempotency. Equivalent inputs reordered by the caller require a new key.
-- Application metrics are process-local and reset on restart; they are not an accounting ledger. No real production load, availability or security certification is claimed.
+- Application metrics are process-local and reset on restart; they are not an accounting ledger. No production availability, load or security certification is claimed.
 
 See [design decisions](docs/design.md), [operations notes](docs/operations.md) and the source tests for implementation details.
 
 For a five-minute demo and code-reading guide, see the [walkthrough](docs/walkthrough.md).
+
+## Workflow research
+
+The design is informed by [Modern Treasury’s exception investigation and reconciliation history](https://docs.moderntreasury.com/payments/docs/manual-reconciliation) and [Stripe’s summary/itemised reconciliation reports](https://docs.stripe.com/reports/payout-reconciliation). These establish useful workflow patterns, not an integration or endorsement. [Macquarie Wrap’s public transaction guidance](https://www.macquarie.com.au/help/personal/macquarie-wrap-super-pension-investment/manage-your-account/balances-and-transactions-for-Macquarie-Wrap.html) provides domain context; this project has no connection to Macquarie systems.
+
+## Development
+
+Independent project built with AI coding assistance. See the tests, design decisions and walkthrough before relying on any claims. This is a working bounded reconciliation tool, not a certified accounting platform.

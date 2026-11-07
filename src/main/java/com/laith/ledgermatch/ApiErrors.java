@@ -16,6 +16,18 @@ public class ApiErrors extends ResponseEntityExceptionHandler {
         .body(ProblemDetail.forStatusAndDetail(e.getStatusCode(), e.getReason()));
   }
 
+  @ExceptionHandler({
+    org.springframework.dao.OptimisticLockingFailureException.class,
+    org.springframework.dao.DataIntegrityViolationException.class
+  })
+  ResponseEntity<ProblemDetail> concurrentReview(Exception e) {
+    return ResponseEntity.status(HttpStatus.CONFLICT)
+        .body(
+            ProblemDetail.forStatusAndDetail(
+                HttpStatus.CONFLICT,
+                "Another update was saved first. Reload before trying again."));
+  }
+
   @ExceptionHandler(ConstraintViolationException.class)
   ResponseEntity<ProblemDetail> invalid(ConstraintViolationException e) {
     return ResponseEntity.badRequest()

@@ -27,6 +27,9 @@ public class ReconciliationBatch {
   @Column(nullable = false, columnDefinition = "TEXT")
   String payload;
 
+  @Column(name = "report_snapshot", columnDefinition = "TEXT")
+  String reportSnapshot;
+
   protected ReconciliationBatch() {}
 
   ReconciliationBatch(

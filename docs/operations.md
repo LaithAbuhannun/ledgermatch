@@ -26,8 +26,8 @@ The protected Prometheus endpoint exposes standard JVM/HTTP metrics, `ledgermatc
 curl -H "X-API-Key: $LEDGERMATCH_API_KEY" http://127.0.0.1:8080/actuator/prometheus
 ```
 
-Counter values reset with the process; database history persists. High exception counts can indicate poor source data, not a service outage. No alerts or SLOs are configured in this demo.
+Counter values reset with the process; database history persists. High exception counts can indicate poor source data, not a service outage. No alerts or SLOs are configured in this installation.
 
 ## Data
 
-The local H2 database lives under `data/`. Compose uses a named PostgreSQL volume. Stop the application before copying local data for a backup. Use synthetic data only. Avoid logging transaction payloads or API keys.
+The local H2 database lives under `data/`. Compose uses a named PostgreSQL volume. Stop the application before copying local data for a backup. Only import records you are authorised to handle in the configured workspace. Public or multi-tenant deployments need additional identity and security controls. Avoid logging transaction payloads or API keys.

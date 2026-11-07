@@ -11,8 +11,14 @@ public final class Contracts {
 
   public record Entry(
       @NotBlank @Size(max = 80) @Pattern(regexp = "[A-Za-z0-9_.-]+") String reference,
-      @NotNull @Digits(integer = 13, fraction = 2) @DecimalMin("0.01") BigDecimal amount,
+      @NotNull @Digits(integer = 13, fraction = 2) BigDecimal amount,
       @NotBlank @Pattern(regexp = "[A-Z]{3}") String currency) {
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    @AssertTrue(message = "amount must not be zero")
+    public boolean isAmountNonZero() {
+      return amount == null || amount.signum() != 0;
+    }
+
     @com.fasterxml.jackson.annotation.JsonIgnore
     @AssertTrue(message = "currency must be a recognised ISO 4217 code")
     public boolean isCurrencyValid() {

@@ -11,7 +11,7 @@
 }
 ```
 
-Account label: nonblank, at most 100 characters. Date: ISO local date, required. Each source: non-null list, up to 5,000 non-null entries. Empty sources are allowed so a missing file can be represented. Reference: 1–80 letters, digits, dots, hyphens or underscores. Amount: positive, at most 13 integer and 2 fractional digits. Currency: recognised uppercase ISO 4217 code. Unknown fields are rejected rather than silently ignored.
+Account label: nonblank, at most 100 characters. Date: ISO local date, required. Each source: non-null list, up to 5,000 non-null entries. Empty sources are allowed so a missing file can be represented. Reference: 1–80 letters, digits, dots, hyphens or underscores. Amount: non-zero signed value, at most 13 integer and 2 fractional digits. Currency: recognised uppercase ISO 4217 code. Unknown fields are rejected rather than silently ignored.
 
 ## Outcome precedence
 
@@ -35,3 +35,17 @@ Reports list references in sorted order and preserve all source rows for each re
 - `409`: same idempotency key with a different submission.
 
 Error bodies use Problem Details. Validation bodies include an `errors` array of field paths and validation messages, without echoing full payment inputs. Batch UUIDs are identifiers, not access credentials.
+
+## Exception reviews
+
+`GET /api/batches/{uuid}/reviews` lists review decisions and their activity history. Unreviewed exceptions have implicit Open status and no owner.
+
+`PUT /api/batches/{uuid}/reviews/{reference}` accepts:
+
+```json
+{"version":0,"status":"IN_PROGRESS","actor":"Alex","owner":"Cash operations","reason":"INVESTIGATING","note":"Checking the settlement cut-off."}
+```
+
+Statuses: OPEN, IN_PROGRESS, RESOLVED. A RESOLVED decision cannot use the INVESTIGATING reason. Each update requires a name and nonblank note. Reasons include TIMING_DIFFERENCE, FEE_CONFIRMED, SOURCE_CORRECTED, DUPLICATE_CONFIRMED and OTHER. These are reviewer assertions; the tool does not verify them against the bank.
+
+Use version 0 for the first update, then the version returned by the server. A stale version or concurrent creation conflict returns 409. Review state and event history are committed atomically. Updates to matched references are rejected. Source payments and original findings are not modified.

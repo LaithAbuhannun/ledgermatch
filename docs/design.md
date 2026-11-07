@@ -22,4 +22,10 @@ A unique database constraint on the idempotency key is the authority. The servic
 
 ## What would change for a real service?
 
-Use user/tenant authorisation, encryption and secret management, append-only access auditing, versioned rule/report snapshots and retention policy. Add observed workload limits, asynchronous imports and operational error budgets after measuring needs. None of those are claimed to exist in this project.
+Use user/tenant authorisation, encryption and secret management, append-only access auditing, a retention policy and externally protected audit storage. Add observed workload limits, asynchronous imports and operational error budgets after measuring needs. None of those are claimed to exist in this project.
+
+## Review lifecycle and report preservation
+
+New batches store the matching report at ingestion. Later code changes cannot alter that snapshot. Reviews live in a separate table with an optimistic version, and each update appends an event in the same database transaction. Resolved means a reviewer recorded a disposition, not that an amount was changed or a missing payment arrived. A resolved issue can be reopened with another note. Names are entered by the operator, not verified by an identity provider.
+
+Existing batches from before V2 have no snapshot and use the legacy computation fallback; they should not be treated as historically frozen.

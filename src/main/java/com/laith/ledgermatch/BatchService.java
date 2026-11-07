@@ -46,6 +46,12 @@ public class BatchService {
     ReconciliationBatch batch =
         new ReconciliationBatch(UUID.randomUUID(), key, fingerprint, submission, payload);
     try {
+      batch.reportSnapshot =
+          json.writeValueAsString(engine.reconcile(batch.id, batch.createdAt, submission));
+    } catch (JsonProcessingException ex) {
+      throw new IllegalStateException("Report snapshot failed", ex);
+    }
+    try {
       // Separate transaction lets a racing unique-key failure roll back before replay is read.
       transaction.executeWithoutResult(s -> repo.saveAndFlush(batch));
     } catch (DataIntegrityViolationException ex) {
@@ -84,6 +90,7 @@ public class BatchService {
 
   private Report report(ReconciliationBatch batch) {
     try {
+      if (batch.reportSnapshot != null) return json.readValue(batch.reportSnapshot, Report.class);
       return engine.reconcile(
           batch.id, batch.createdAt, json.readValue(batch.payload, Submission.class));
     } catch (JsonProcessingException ex) {

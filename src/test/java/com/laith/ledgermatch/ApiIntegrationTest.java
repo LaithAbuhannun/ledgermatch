@@ -79,7 +79,7 @@ class ApiIntegrationTest {
 
   @Test
   void validatesNestedMoneyAndCurrency() throws Exception {
-    mvc.perform(submission("bad-amount", BODY.replace("10.00", "-1.00")))
+    mvc.perform(submission("bad-amount", BODY.replace("10.00", "0.00")))
         .andExpect(status().isBadRequest());
     mvc.perform(submission("bad-precision", BODY.replace("10.00", "10.001")))
         .andExpect(status().isBadRequest());
@@ -91,6 +91,13 @@ class ApiIntegrationTest {
                 BODY.replace(
                     "[{\"reference\":\"A\",\"amount\":10.00,\"currency\":\"AUD\"}]", "[null]")))
         .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void supportsDebitTransactions() throws Exception {
+    mvc.perform(submission("debit-" + UUID.randomUUID(), BODY.replace("10.00", "-10.00")))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.counts.MATCHED").value(1));
   }
 
   @Test

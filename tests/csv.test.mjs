@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parsePayments, reportCsv, csvCell } from '../src/main/resources/static/csv.mjs';
+import { parsePayments, parseMappedPayments, reportCsv, csvCell } from '../src/main/resources/static/csv.mjs';
 const header = 'reference,amount,currency\n';
 test('parses normal rows and preserves amount precision', () => {
   assert.deepEqual(parsePayments(header+'PAY-1,9999999999999.99,AUD')[0],{reference:'PAY-1',amount:'9999999999999.99',currency:'AUD'});
@@ -20,11 +20,11 @@ test('rejects missing, duplicate or extra headings', () => {
 test('rejects empty files and header-only files', () => {
   assert.throws(()=>parsePayments(''),/empty/);assert.throws(()=>parsePayments(header),/no payments/);
 });
-test('rejects zero, negative, overprecision and exponent amounts', () => {
-  for(const amount of ['0','-10','1.001','1e2','NaN','10000000000000'])assert.throws(()=>parsePayments(header+`A,${amount},AUD`),/positive amount/);
+test('rejects zero, overprecision and exponent amounts', () => {
+  for(const amount of ['0','1.001','1e2','NaN','10000000000000'])assert.throws(()=>parsePayments(header+`A,${amount},AUD`),/non-zero amount/);
 });
 test('handles quoted commas without silently splitting columns', () => {
-  assert.throws(()=>parsePayments(header+'A,"1,000.00",AUD'),/positive amount/);
+  assert.throws(()=>parsePayments(header+'A,"1,000.00",AUD'),/non-zero amount/);
 });
 test('rejects invalid references, currencies and row width', () => {
   assert.throws(()=>parsePayments(header+'A B,12,AUD'),/reference/);
@@ -46,4 +46,23 @@ test('CSV export preserves duplicate source rows and absent sides', () => {
 test('CSV escapes quotations and neutralises spreadsheet formulas', () => {
   assert.equal(csvCell('=SUM(A1)'), '"\'=SUM(A1)"');
   assert.equal(csvCell('hello "world"'), '"hello ""world"""');
+});
+
+test('imports debit amounts without changing direction',()=>{
+ assert.equal(parsePayments(header+'A,-12.50,AUD')[0].amount,'-12.50');
+});
+test('maps arbitrary columns and ignores unrelated export fields',()=>{
+ const data=parseMappedPayments('Posted,Our Ref,Value,CCY,Description\n2026-11-07,A,12.50,AUD,Settlement',{reference:1,amount:2,currency:3});
+ assert.deepEqual(data[0],{reference:'A',amount:'12.50',currency:'AUD'});
+});
+test('supports explicitly selected fixed currency',()=>{
+ assert.equal(parseMappedPayments('Payment,Value\nA,12.50',{reference:0,amount:1,currency:'fixed:AUD'})[0].currency,'AUD');
+});
+test('rejects assigning one column to two fields',()=>{
+ assert.throws(()=>parseMappedPayments('Payment,Value\nA,12.50',{reference:0,amount:0,currency:'fixed:AUD'}),/different column/);
+});
+test('export includes review decisions and spreadsheet-safe notes',()=>{
+ const report={findings:[{reference:'A',status:'AMOUNT_MISMATCH',ledger:[{amount:10,currency:'AUD'}],bank:[{amount:9,currency:'AUD'}]}]};
+ const output=reportCsv(report,[{reference:'A',status:'RESOLVED',owner:'Ops',history:[{note:'=bad'}]}]);
+ assert.match(output,/RESOLVED/);assert.match(output,/Ops/);assert.match(output,/'=bad/);
 });
