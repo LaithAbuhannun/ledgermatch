@@ -4,6 +4,8 @@ A Java Spring Boot payment reconciliation service. Compare an internal ledger wi
 
 **Personal portfolio project.** Uses synthetic data, never initiates payments, and is not affiliated with a bank or investment platform. Built with AI coding assistance; the implementation, tests and design notes are available for review.
 
+![LedgerMatch sample exception report](docs/preview.png)
+
 ## The problem
 
 A payment may appear in an internal ledger but not a settlement file. A file might contain the same reference twice, the wrong amount, or a different currency. A spreadsheet comparison can hide duplicates or accidentally compare amounts across currencies. LedgerMatch makes these cases explicit and keeps the submitted batch for later review.
@@ -102,3 +104,5 @@ A modular monolith keeps matching logic independent of HTTP and storage. There i
 - Application metrics are process-local and reset on restart; they are not an accounting ledger. No real production load, availability or security certification is claimed.
 
 See [design decisions](docs/design.md), [operations notes](docs/operations.md) and the source tests for implementation details.
+
+For a five-minute demo and code-reading guide, see the [walkthrough](docs/walkthrough.md).
