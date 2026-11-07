@@ -2,11 +2,11 @@
 
 ## Five-minute demo
 
-1. Follow the local setup in the README. Open the dashboard and load the synthetic sample.
-2. Reconcile it and explain why there are six references but eleven input rows. The duplicate belongs to a single reference, not two separate findings.
+1. Follow the local setup in the README. Open the dashboard and click **Try an example**. It works without an access key and does not write to the database.
+2. Review it and explain why there are six references but eleven input rows. The duplicate belongs to a single reference, not two separate findings.
 3. Show each exception. Currency mismatch is checked before amount mismatch so different currencies are not treated as directly comparable amounts.
-4. Submit again. The UI keeps the same idempotency key for unchanged content, and the server returns the same stored batch.
-5. Change a number and submit to create a new batch. Use the API example to demonstrate that changing the payload while explicitly reusing an existing key produces 409.
+4. Download the two sample CSVs from the format guide. Select them in the upload controls, enter an account name and date, and connect using your local workspace key. Compare them, then submit again: unchanged content returns the same stored batch.
+5. Edit an amount in a downloaded CSV, reselect the file and compare to create a new batch. Use the API example to demonstrate that changing the payload while explicitly reusing an existing key produces 409.
 6. Run `./mvnw verify` and inspect the concurrency test and the decimal-scale test.
 
 ## Read the code in this order
@@ -34,4 +34,4 @@
 
 ## A useful next change to implement yourself
 
-Add a bank-only duplicate test, or a filter to show a single exception type. Explain the behaviour first, write a failing test, implement the change and run the suite. For a deeper change, persist versioned report snapshots so future matching-rule changes cannot alter historical reports.
+Add a bank-only duplicate test, or a saved account preset. Explain the behaviour first, write a failing test, implement the change and run the suite. For a deeper change, persist versioned report snapshots so future matching-rule changes cannot alter historical reports.

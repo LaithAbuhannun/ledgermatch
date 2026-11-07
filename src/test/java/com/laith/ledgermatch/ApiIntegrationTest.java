@@ -124,6 +124,18 @@ class ApiIntegrationTest {
   }
 
   @Test
+  void publicExampleIsReadOnlyAndNeedsNoWorkspaceKey() throws Exception {
+    long before = repo.count();
+    mvc.perform(get("/demo/report"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.references").value(6))
+        .andExpect(jsonPath("$.exceptions").value(5));
+    assertThat(repo.count()).isEqualTo(before);
+    mvc.perform(get("/sample-ledger.csv")).andExpect(status().isOk());
+    mvc.perform(get("/csv.mjs")).andExpect(status().isOk());
+  }
+
+  @Test
   void concurrentRetriesCreateOneBatch() throws Exception {
     String key = UUID.randomUUID().toString();
     var executor = Executors.newFixedThreadPool(4);

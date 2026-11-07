@@ -23,7 +23,7 @@ The included sample contains six references: one match, one missing bank payment
 - Idempotency keys with a database uniqueness constraint and conflict handling for concurrent retries.
 - Validated nested input and consistent HTTP problem responses.
 - Shared API-key protection for data endpoints and metrics; public liveness/readiness summary.
-- Actuator health, Prometheus metrics, paginated history and a small browser review interface with JSON report download.
+- Actuator health, Prometheus metrics, paginated history and a CSV upload interface with previews, issue filters, payment details and spreadsheet export.
 - Unit and API/database integration tests, plus GitHub Actions running against PostgreSQL.
 
 ## Run locally
@@ -36,7 +36,11 @@ export LEDGERMATCH_API_KEY=local-demo-key-change-me
 ./mvnw spring-boot:run
 ```
 
-Open **http://127.0.0.1:8080**, load the sample, enter the same demo key and reconcile. Data is stored in `data/` (excluded from Git). The key is required at startup and is never stored by the browser UI.
+Open **http://127.0.0.1:8080** and choose **Try an example**. No access key is needed to view the read-only sample report.
+
+For your own synthetic files, enter an account name and date, choose the ledger and bank CSVs, check the previews, and compare. Open **Connect to your local workspace** to supply the configured access key. Sample CSV downloads and a format guide are included in the form. Results support search, issue filters, payment details and CSV export.
+
+Data is stored in `data/` (excluded from Git). The server key is required at startup, and the browser keeps it in memory only for the session.
 
 ### PostgreSQL and containers
 
@@ -67,6 +71,7 @@ A new batch returns `201 Created` and a `Location` header. Submit the same key a
 | POST | `/api/batches` | Validate, store and reconcile a batch |
 | GET | `/api/batches/{uuid}` | Retrieve its reconciliation report |
 | GET | `/api/batches?page=0&size=20` | Browse history; size 1–100 |
+| GET | `/demo/report` | Public synthetic example, with no database writes |
 | GET | `/actuator/health` | Public summary, with no database details |
 | GET | `/actuator/prometheus` | Protected metrics including batch/exception counters |
 
@@ -78,7 +83,9 @@ All `/api/` requests require `X-API-Key`. POST also requires `Idempotency-Key` (
 ./mvnw verify
 ```
 
-By default tests use an isolated in-memory H2 database. CI sets `TEST_DATABASE_URL`, `TEST_DATABASE_USER` and `TEST_DATABASE_PASSWORD` to run the same integration suite against a PostgreSQL service. Tests cover all six outcomes, currency priority, decimal precision, input validation, authentication, pagination, persistence, replay conflicts and concurrent retries.
+By default tests use an isolated in-memory H2 database. CI sets `TEST_DATABASE_URL`, `TEST_DATABASE_USER` and `TEST_DATABASE_PASSWORD` to run the same integration suite against a PostgreSQL service. Run `node --test tests/csv.test.mjs` for the CSV import/export suite (Node 18+). It covers quoted fields, BOM/CRLF, duplicate preservation, validation, row limits and spreadsheet formula escaping. CI runs both suites.
+
+Backend tests cover all six outcomes, currency priority, decimal precision, input validation, authentication, pagination, persistence, replay conflicts and concurrent retries.
 
 ## Architecture
 

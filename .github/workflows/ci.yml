@@ -25,6 +25,8 @@ jobs:
           distribution: temurin
           java-version: '17'
           cache: maven
+      - name: Test CSV import and export
+        run: node --test tests/csv.test.mjs
       - name: Test against PostgreSQL
         run: ./mvnw -B verify
         env:

@@ -26,7 +26,16 @@ public class ApiKeyFilter extends OncePerRequestFilter {
     boolean publicRead =
         req.getMethod().equals("GET")
             && java.util.Set.of(
-                    "/", "/index.html", "/app.css", "/app.js", "/demo.json", "/actuator/health")
+                    "/",
+                    "/index.html",
+                    "/app.css",
+                    "/app.js",
+                    "/csv.mjs",
+                    "/demo.json",
+                    "/demo/report",
+                    "/sample-ledger.csv",
+                    "/sample-bank.csv",
+                    "/actuator/health")
                 .contains(path);
     boolean protectedPath = !publicRead;
     String supplied = req.getHeader("X-API-Key");

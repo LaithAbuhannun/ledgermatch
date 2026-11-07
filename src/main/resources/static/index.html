@@ -1,6 +1,37 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>LedgerMatch · Settlement review</title><link rel="stylesheet" href="/app.css"><script src="/app.js" defer></script></head>
-<body><header><a class="brand" href="/">LedgerMatch<span>LM</span></a><span class="eyebrow">PAYMENT OPERATIONS / PERSONAL PROJECT</span></header>
-<main><section class="intro"><p class="eyebrow">SETTLEMENT REVIEW</p><h1>Find the payments<br>that don't add up.</h1><p class="lede">Compare your ledger with a bank settlement file. Review missing payments, duplicates and mismatches in one place.</p></section>
-<div class="workspace"><section class="panel"><div class="section-title"><h2>01 / Prepare a batch</h2><button id="demo" class="quiet">Load sample data</button></div><label for="key">API key</label><input id="key" type="password" autocomplete="off" placeholder="Your LEDGERMATCH_API_KEY"><p class="hint">Used for this request only. Never saved in the browser.</p><label for="payload">Settlement data <span>JSON · up to 5,000 entries per source</span></label><textarea id="payload" spellcheck="false" aria-describedby="format-help"></textarea><p class="hint" id="format-help">Amounts must be positive with at most two decimal places. References are case sensitive.</p><button id="submit" class="primary">Reconcile batch <span>→</span></button><p id="message" role="status" aria-live="polite">Load the sample to explore all six outcomes.</p></section>
-<section class="panel results"><h2>02 / Review results</h2><div class="stats"><div><strong id="total">—</strong><span>References</span></div><div><strong id="matched">—</strong><span>Matched</span></div><div><strong id="exceptions">—</strong><span>Exceptions</span></div></div><div class="toolbar"><label for="filter">Show</label><select id="filter"><option value="exceptions">Exceptions only</option><option value="all">All references</option></select><button id="download" class="quiet" disabled>Download report</button></div><p id="batch" class="hint">Your report will appear here after reconciliation.</p><div class="table-wrap"><table><thead><tr><th>Reference</th><th>Outcome</th><th>Ledger</th><th>Bank</th></tr></thead><tbody id="rows"><tr><td colspan="4" class="empty">No batch reconciled yet.</td></tr></tbody></table></div></section></div><footer>Deterministic reference matching · Exact decimal arithmetic · No payment execution<br>Use synthetic data only. Shared API key demo; not a banking or accounting system.</footer></main></body></html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>LedgerMatch — Payment reconciliation</title>
+  <link rel="stylesheet" href="/app.css"><script type="module" src="/app.js"></script>
+</head>
+<body>
+<header><a href="/" class="brand"><span class="logo" aria-hidden="true">≋</span> LedgerMatch</a><span class="header-note">Payment reconciliation</span><span class="project">Portfolio demo</span></header>
+<main>
+  <div class="page-title"><div><p class="kicker">SETTLEMENTS</p><h1>Reconcile payments</h1><p>Compare your payment records with a bank settlement file.</p></div><button id="demo" class="secondary">Try an example</button></div>
+  <section class="input-panel" aria-labelledby="import-title">
+    <div class="panel-heading"><h2 id="import-title">Add your files</h2><span>CSV files · up to 5,000 payments each</span></div>
+    <div class="form-row"><div><label for="account">Account name</label><input id="account" maxlength="100" placeholder="e.g. Operating account"></div><div><label for="date">Settlement date</label><input id="date" type="date"></div></div>
+    <div class="uploads">
+      <div class="upload"><div class="file-icon" aria-hidden="true">↥</div><div><label for="ledger-file">Your payment records</label><p>The payments recorded in your ledger.</p><input id="ledger-file" type="file" accept=".csv,text/csv" aria-describedby="ledger-status"><p id="ledger-status" class="file-status">No file selected</p></div></div>
+      <div class="upload"><div class="file-icon" aria-hidden="true">↥</div><div><label for="bank-file">Bank settlement</label><p>The payments reported by your bank.</p><input id="bank-file" type="file" accept=".csv,text/csv" aria-describedby="bank-status"><p id="bank-status" class="file-status">No file selected</p></div></div>
+    </div>
+    <div id="preview" hidden><h3>File preview</h3><div id="preview-tables" class="previews"></div></div>
+    <details class="format"><summary>CSV format and sample files</summary><p>Use three columns: <code>reference,amount,currency</code>. Each row is one payment. For example: <code>PAY-001,100.00,AUD</code>. References are case sensitive; amounts must be positive with up to two decimal places.</p><a href="/sample-ledger.csv" download>Download sample payment records</a><a href="/sample-bank.csv" download>Download sample bank settlement</a></details>
+    <details id="connection" class="connection"><summary>Connect to your local workspace <span id="connected">Not connected</span></summary><label for="key">Workspace access key</label><div class="key-row"><input id="key" type="password" autocomplete="off" placeholder="Enter the key configured for this installation"><button id="connect" class="secondary">Connect</button></div><p>The access key is required for your own files. It stays in memory for this session. The example works without a key.</p></details>
+    <div class="action-row"><p id="message" role="status" aria-live="polite">Choose two files, or try an example to see how it works.</p><button id="submit" class="primary" disabled>Compare payments</button></div>
+  </section>
+  <section id="results" class="results" aria-labelledby="results-title" hidden>
+    <div class="results-title"><div><h2 id="results-title">Reconciliation results</h2><p id="batch"></p></div><button id="download" class="secondary">Export CSV</button></div>
+    <div id="sample-notice" class="sample-notice" hidden>Example report · Synthetic payments only. Nothing has been added to your history.</div>
+    <div class="stats"><div><span>Total references</span><strong id="total">0</strong></div><div><span>Matched</span><strong id="matched">0</strong></div><div class="attention"><span>Needs review</span><strong id="exceptions">0</strong></div></div>
+    <div class="toolbar"><div class="tabs" role="group" aria-label="Results view"><button id="exceptions-tab" aria-pressed="true">Needs review</button><button id="all-tab" aria-pressed="false">All payments</button></div><label class="search-label" for="search">Search reference<input id="search" type="search" placeholder="e.g. PAY-002"></label><label for="filter">Issue type<select id="filter"><option value="all">All issues</option><option value="MISSING_IN_BANK">Not in bank file</option><option value="MISSING_IN_LEDGER">Not in your records</option><option value="AMOUNT_MISMATCH">Different amounts</option><option value="CURRENCY_MISMATCH">Different currencies</option><option value="DUPLICATE_REFERENCE">Duplicate reference</option></select></label></div>
+    <p id="result-count" class="result-count"></p>
+    <div class="table-wrap"><table class="result-table"><thead><tr><th>Reference</th><th>Status</th><th class="money">Your records</th><th class="money">Bank file</th><th><span class="sr-only">Details</span></th></tr></thead><tbody id="rows"></tbody></table></div>
+    <p class="footnote">Counts refer to unique payment references. Duplicate rows are grouped for review.</p>
+  </section>
+  <section id="empty" class="empty"><span aria-hidden="true">≋</span><h2>Your comparison will appear here</h2><p>We’ll separate matching payments from anything that needs a closer look.</p></section>
+  <footer>Personal project using synthetic data. No bank connection and no money movement.</footer>
+</main>
+<dialog id="detail"><div class="dialog-title"><h2 id="detail-title">Payment details</h2><button id="close-detail" aria-label="Close payment details">×</button></div><p id="detail-explanation"></p><div id="detail-entries"></div><p id="detail-next" class="next-step"></p></dialog>
+</body></html>
