@@ -5,3 +5,22 @@ header nav{display:flex;height:100%;align-items:stretch;gap:22px;margin-left:aut
 .column-mapping{margin-top:12px;border-top:1px solid #dce3ed;padding-top:10px;font-size:10px;color:#647086}.column-mapping label{margin:10px 0 4px;font-size:10px}.column-mapping select{font-size:11px}.column-mapping button{margin-top:12px;font-size:10px}.column-mapping summary{font-size:11px}
 
 .report-actions{display:flex;gap:8px}.results:first-child{margin-top:0}.results-title{margin-bottom:5px}.results{box-shadow:0 1px 3px #16314e04}@media(max-width:700px){.report-actions{flex-direction:column;gap:6px}.report-actions button{padding:7px 9px;font-size:10px}}
+
+/* A quiet moving dot field sits behind the workspace, never over the data. */
+:root{--blue:#182d2b;--border:#dfe4e2;--muted:#64716e;background:#f3f5f2;color:#202b29}
+body{isolation:isolate;overflow-x:hidden}
+body::before,body::after{content:"";position:fixed;inset:-56px;pointer-events:none;z-index:-1;background-image:radial-gradient(circle,#182621 1px,transparent 1.3px);background-size:28px 28px;opacity:.13;animation:dot-drift 24s linear infinite;will-change:transform}
+body::after{background-size:84px 84px;opacity:.08;animation:dot-drift 38s linear infinite reverse}
+@keyframes dot-drift{from{transform:translate3d(0,0,0)}to{transform:translate3d(28px,28px,0)}}
+header{background:#172522;color:#fff;border-bottom:1px solid #34423d;box-shadow:0 4px 20px #13211a0d}
+.brand{color:#f5f8f1;letter-spacing:-.8px}.logo{background:#d4e8b6;color:#172522;border-radius:9px;box-shadow:inset 0 0 0 1px #ffffff40}
+.header-note{color:#b2c0b8;border-color:#405049}.nav-button{color:#aebfb6}.nav-button.active{color:#e0efc9;border-bottom-color:#c7dfa7}.settings-button{background:#243530;border-color:#4a5b53;color:#e1e9e2}
+main{padding-top:38px}.page-title{min-height:115px;margin-bottom:26px}.kicker{display:flex;align-items:center;gap:8px;color:#556b5e;letter-spacing:2px}.kicker::before{content:"";width:6px;height:6px;background:#425c45;border-radius:50%;box-shadow:0 0 0 4px #dbe6d4}
+h1{font-size:34px;letter-spacing:-1.3px;color:#192b24;font-weight:700}.page-title p:last-child{margin-top:8px;color:#5a6c61;max-width:610px}
+.input-panel,.results{border-color:#d9e1d9;border-radius:16px;box-shadow:0 8px 32px #192d1e07,0 1px 2px #192d1e06;background:#fffffff7}
+button,input,select,textarea{transition:background-color .18s,border-color .18s,box-shadow .18s,transform .18s}button{border-radius:8px}.primary{background:#213d30;box-shadow:0 2px 4px #18322520}.primary:hover:not(:disabled){background:#152b20;transform:translateY(-1px)}.secondary{border-color:#ccd7cf;color:#304638;background:#fff}.secondary:hover:not(:disabled){background:#f0f5eb;border-color:#a5b99e}.settings-button:hover:not(:disabled){background:#344b40}.nav-button:hover:not(:disabled){background:#ffffff09}
+.upload{border-color:#c3d0c4;background:#f7faf5;border-radius:12px;transition:border-color .2s,box-shadow .2s}.upload:hover{border-color:#7d977c;box-shadow:0 3px 12px #31492b08}.file-icon{background:#e9f0e1;border-color:#d4dfc9;color:#44633d;border-radius:8px}
+.stats{overflow:hidden;border-radius:11px;background:#fafcf8}.stats strong{font-size:34px;color:#243e2b}.stats>div:nth-child(2){background:#f1f7ec}.stats>div:nth-child(3){background:#fdf9ee}.stats .attention strong{color:#956827}.stats>div:nth-child(4){background:#f3f7f2}.stats>div{padding:19px 20px}
+.tabs{background:#edf1eb;border-radius:8px}.tabs button[aria-pressed=true]{color:#233d2a;border-radius:6px}.row-detail{color:#30593b}.result-table tbody tr:hover{background:#f8fbf5}th{background:#f3f6f0;color:#61715e}td{border-bottom-color:#eaf0e7}.sample-notice{background:#edf3e8;color:#4b6344}.empty{background:#ffffff85;border:1px dashed #cbd8c8;border-radius:16px;margin-top:24px;padding:36px 20px}.empty>span{background:#e3ecd9;color:#526a45}.empty h2{color:#4c6244}dialog{border-radius:16px;border-color:#ccd8c9;box-shadow:0 24px 90px #14251d33}dialog::backdrop{background:#12231cb3;backdrop-filter:blur(3px)}.next-step{background:#f0f5eb}.activity li{border-left-color:#b7cfa9}footer{color:#677863}
+@media(max-width:700px){h1{font-size:27px}.page-title{min-height:105px}.stats strong{font-size:26px}.stats>div{padding:13px 9px}main{padding-top:24px}header{gap:12px}.input-panel,.results{border-radius:12px}}
+@media(prefers-reduced-motion:reduce){body::before,body::after{animation:none;will-change:auto}button,input,select,textarea,.upload{transition:none}.primary:hover:not(:disabled){transform:none}}
