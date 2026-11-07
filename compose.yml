@@ -1,0 +1,29 @@
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: ledgermatch
+      POSTGRES_USER: ledgermatch
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:?Set DATABASE_PASSWORD in .env}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ledgermatch"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+  app:
+    build: .
+    ports:
+      - "127.0.0.1:8080:8080"
+    environment:
+      SERVER_ADDRESS: 0.0.0.0
+      DATABASE_URL: jdbc:postgresql://db:5432/ledgermatch
+      DATABASE_USER: ledgermatch
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD:?Set DATABASE_PASSWORD in .env}
+      LEDGERMATCH_API_KEY: ${LEDGERMATCH_API_KEY:?Set LEDGERMATCH_API_KEY in .env}
+    depends_on:
+      db:
+        condition: service_healthy
+volumes:
+  db-data:

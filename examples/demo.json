@@ -1,0 +1,63 @@
+{
+  "accountLabel": "Demo settlement account",
+  "settlementDate": "2026-11-07",
+  "ledger": [
+    {
+      "reference": "PAY-001",
+      "amount": 100,
+      "currency": "AUD"
+    },
+    {
+      "reference": "PAY-002",
+      "amount": 250,
+      "currency": "AUD"
+    },
+    {
+      "reference": "PAY-003",
+      "amount": 80,
+      "currency": "AUD"
+    },
+    {
+      "reference": "PAY-004",
+      "amount": 30,
+      "currency": "AUD"
+    },
+    {
+      "reference": "PAY-005",
+      "amount": 40,
+      "currency": "AUD"
+    },
+    {
+      "reference": "PAY-005",
+      "amount": 40,
+      "currency": "AUD"
+    }
+  ],
+  "bank": [
+    {
+      "reference": "PAY-001",
+      "amount": 100,
+      "currency": "AUD"
+    },
+    {
+      "reference": "PAY-002",
+      "amount": 249,
+      "currency": "AUD"
+    },
+    {
+      "reference": "PAY-004",
+      "amount": 30,
+      "currency": "USD"
+    },
+    {
+      "reference": "PAY-005",
+      "amount": 40,
+      "currency": "AUD"
+    },
+    {
+      "reference": "PAY-006",
+      "amount": 75,
+      "currency": "AUD"
+    }
+  ]
+}
